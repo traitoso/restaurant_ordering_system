@@ -32,6 +32,22 @@ app.get("/categories", async (req, res) => {
     }
 });
 
+app.get("/categories/search/:keyword", async (req, res) => {
+    try {
+        const categories = await Category.searchByKeyword(
+            req.params.keyword,
+        );
+
+        res.status(200).json(categories);
+    } catch (error) {
+        console.log("Erro ao pesquisar categorias: ", error);
+
+        res.status(500).json({
+            message: "Erro ao pesquisar categorias.",
+        });
+    }
+});
+
 app.get("/categories/:id", async (req, res) => {
     try {
         const category = await Category.findById(req.params.id);
