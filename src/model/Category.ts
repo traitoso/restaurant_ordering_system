@@ -54,7 +54,8 @@ async function update(
         icon: string;
         display_order: number;
         active: boolean;
-    }) {
+    }
+) {
     const { data, error } = await supabase
         .from("categories")
         .update(category)
@@ -104,4 +105,4 @@ export default {
     update,
     remove,
     searchByKeyword
-}
+};
