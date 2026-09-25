@@ -1,0 +1,17 @@
+$kind: http-request
+url: http://localhost:3000/products
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+        "category_id": "040f6a7f-df11-4791-bac6-bd931dfb7250",
+        "name": "Pizza de teste",
+        "description": "Pizza doce - teste.",
+        "price": 35.9,
+        "image_url": "",
+        "active": true
+    }
+order: 3000

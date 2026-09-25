@@ -1,0 +1,16 @@
+$kind: http-request
+url: http://localhost:3000/categories
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+        "name": "Pizzas",
+        "description": "Pizzas artesanais com diversos sabores e ingredientes.",
+        "icon": "🍕",
+        "display_order": 1,
+        "active": true
+    }
+order: 4000

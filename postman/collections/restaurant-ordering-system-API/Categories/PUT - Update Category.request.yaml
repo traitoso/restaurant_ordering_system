@@ -1,0 +1,13 @@
+$kind: http-request
+url: http://localhost:3000/categories/dd2cc9f9-c6af-474e-982a-e9ea8956b312
+method: PUT
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+        "name": "Categoria nova - atualizado",
+        "description": "Teste categoria nova - atualizado"
+    }
+order: 5000

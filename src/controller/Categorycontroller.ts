@@ -1,9 +1,9 @@
 import type { Request, Response } from "express";
-import Category from "../model/Category.js";
+import CategoryRepository from "../repositories/CategoryRepository.js";
 
 async function getAll(req: Request, res: Response) {
     try {
-        const categories = await Category.findAll();
+        const categories = await CategoryRepository.findAll();
 
         res.status(200).json(categories);
     } catch (error) {
@@ -22,7 +22,7 @@ async function searchbyKeyword(req: Request<{ keyword: string }>, res: Response)
     }
 
     try {
-        const categories = await Category.searchByKeyword(keyword);
+        const categories = await CategoryRepository.searchByKeyword(keyword);
 
         res.status(200).json(categories);
     } catch (error) {
@@ -41,7 +41,7 @@ async function getById(req: Request<{ id: string }>, res: Response) {
     }
 
     try {
-        const category = await Category.findById(id);
+        const category = await CategoryRepository.findById(id);
 
         res.status(200).json(category);
     } catch (error) {
@@ -53,7 +53,7 @@ async function getById(req: Request<{ id: string }>, res: Response) {
 
 async function create(req: Request, res: Response) {
     try {
-        const category = await Category.create(req.body);
+        const category = await CategoryRepository.create(req.body);
 
         res.status(201).json(category);
     } catch (error) {
@@ -72,7 +72,7 @@ async function update(req: Request<{ id: string }>, res: Response) {
     }
 
     try {
-        const category = await Category.update(id, req.body);
+        const category = await CategoryRepository.update(id, req.body);
 
         res.status(200).json(category);
     } catch (error) {
@@ -91,7 +91,7 @@ async function remove(req: Request<{ id: string }>, res: Response) {
     }
 
     try {
-        await Category.remove(id);
+        await CategoryRepository.remove(id);
 
         res.status(200).json({ message: "Categoria removida com sucesso." });
     } catch (error) {

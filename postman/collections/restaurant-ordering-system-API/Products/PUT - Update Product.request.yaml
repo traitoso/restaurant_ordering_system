@@ -1,0 +1,15 @@
+$kind: http-request
+url: http://localhost:3000/products/39166176-d018-481e-9560-8dce2a6dde0f
+method: PUT
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+        "categoryId": "9913e898-7302-4d20-80ac-2c0e703449cf",
+        "name": "Pizza de teste - atualizada",
+        "description": "Pizza doce - teste atualizada",
+        "price": 22.2
+    }
+order: 4000

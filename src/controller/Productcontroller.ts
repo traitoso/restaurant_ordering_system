@@ -1,9 +1,9 @@
 import type { Request, Response } from "express";
-import Product from "../model/Product.js";
+import ProductRepository from "../repositories/ProductRepository.js";
 
 async function getAll(req: Request, res: Response) {
     try {
-        const products = await Product.findAll();
+        const products = await ProductRepository.findAll();
 
         res.status(200).json(products);
     } catch (error) {
@@ -22,7 +22,7 @@ async function getById(req: Request<{ id: string }>, res: Response) {
     }
 
     try {
-        const product = await Product.findById(id);
+        const product = await ProductRepository.findById(id);
 
         res.status(200).json(product);
     } catch (error) {
@@ -34,7 +34,7 @@ async function getById(req: Request<{ id: string }>, res: Response) {
 
 async function create(req: Request, res: Response) {
     try {
-        const product = await Product.create(req.body);
+        const product = await ProductRepository.create(req.body);
 
         res.status(201).json(product);
     } catch (error) {
@@ -53,7 +53,7 @@ async function update(req: Request<{ id: string }>, res: Response) {
     }
 
     try {
-        const product = await Product.update(id, req.body);
+        const product = await ProductRepository.update(id, req.body);
 
         res.status(200).json(product);
     } catch (error) {
@@ -72,7 +72,7 @@ async function remove(req: Request<{ id: string }>, res: Response) {
     }
 
     try {
-        await Product.remove(id);
+        await ProductRepository.remove(id);
 
         res.status(200).json({ message: "Produto removido com sucesso." });
     } catch (error) {
