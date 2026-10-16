@@ -1,6 +1,8 @@
 import type { Request, Response } from "express";
 import { Category } from "../model/Category.js";
 import CategoryRepository from "../repositories/CategoryRepository.js";
+import { ValidationError } from "../errors/Validation.js";
+import { NotFoundError } from "../errors/NotFound.js";
 
 async function getAll(req: Request, res: Response) {
     try {
@@ -51,7 +53,7 @@ async function getById(req: Request<{ id: string }>, res: Response) {
         const category = await CategoryRepository.findById(id);
 
         res.status(200).json({
-            id: category.getId,
+            id: category.getId(),
             name: category.getName(),
             description: category.getDescription(),
             icon: category.getIcon(),
@@ -61,8 +63,13 @@ async function getById(req: Request<{ id: string }>, res: Response) {
     } catch (error) {
         console.log("Erro ao buscar categoria: ", error);
 
-        res.status(404).json({
-            message: "Categoria não encontrada."
+        if (error instanceof NotFoundError) {
+            return res.status(404).json({
+                message: error.message
+            });
+        }
+        res.status(500).json({
+            message: "Erro ao buscar categoria."
         });
     }
 }
@@ -79,6 +86,11 @@ async function create(req: Request, res: Response) {
     } catch (error) {
         console.log("Erro ao criar categoria: ", error);
 
+        if(error instanceof ValidationError) {
+            return res.status(400).json({
+                message: error.message
+            });
+        }
         res.status(500).json({
             message: "Erro ao criar categoria."
         });
@@ -87,7 +99,7 @@ async function create(req: Request, res: Response) {
 
 async function update(req: Request<{ id: string }>, res: Response) {
     const { id } = req.params;
-    const { name, display_order, description, icon } = req.body;
+    const { name, display_order, description, icon, active } = req.body;
 
     if (!id) {
         return res.status(404).json({
@@ -98,20 +110,44 @@ async function update(req: Request<{ id: string }>, res: Response) {
     try {
         const category = await CategoryRepository.findById(id);
 
-        //criar validações dos campos recebidos pelo req.body
-
+        if(name !== undefined) {
+            category.rename(name);
+        }
+        if(description !== undefined) {
+            category.changeDescription(description);
+        }
+        if(icon !== undefined) {
+            category.changeIcon(icon);
+        }
+        if(display_order !== undefined) {
+            category.changeDisplayOrder(display_order);
+        }
+        if(active === true) {
+            category.activate();
+        }
+        if (active === false) {
+            category.deactivate();
+        }
         const updatedCategory = await CategoryRepository.update(category);
 
-        res.status(200).json(updatedCategory)
+        res.status(200).json(updatedCategory);
     } catch (error) {
         console.log("Erro ao atualizar categoria: ", error);
-
-        res.status(404).json({
-            message: "Categoria não encontrada."
+        if (error instanceof NotFoundError) {
+            return res.status(404).json({
+                message: error.message
+            });
+        }
+        if (error instanceof ValidationError) {
+            return res.status(400).json({
+                message: error.message
+            });
+        }
+        res.status(500).json({
+            message: "Erro ao atualizar categoria."
         });
     }
 }
-
 async function remove(req: Request<{ id: string }>, res: Response) {
     const { id } = req.params;
 
@@ -130,8 +166,13 @@ async function remove(req: Request<{ id: string }>, res: Response) {
     } catch (error) {
         console.log("Erro ao excluir categoria: ", error);
 
-        res.status(404).json({
-            message: "Categoria não encontrada."
+        if (error instanceof NotFoundError) {
+            return res.status(404).json({
+                message: error.message
+            });
+        }
+        res.status(500).json({
+            message: "Erro ao excluir categoria."
         });
     }
 }

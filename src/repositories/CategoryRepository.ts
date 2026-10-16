@@ -1,5 +1,6 @@
 import supabase from "../config/supabase.js";
 import { Category } from "../model/Category.js";
+import { NotFoundError } from "../errors/NotFound.js";
 
 async function findAll() {
     const { data, error } = await supabase
@@ -18,20 +19,24 @@ async function findById(id: string): Promise<Category> {
         .from("categories")
         .select("*")
         .eq("id", id)
-        .single();
+        .maybeSingle();
 
     if (error) {
         throw error;
+    }
+
+    if (!data) {
+        throw new NotFoundError("Categoria não encontrada.");
     }
 
     return Category.restore(
         data.id,
         data.name,
         data.display_order,
-        data.activate,
+        data.active,
         data.description,
         data.icon,
-    )
+    );
 }
 
 async function create(category: Category) {
@@ -55,10 +60,10 @@ async function create(category: Category) {
 }
 
 async function update(category: Category) {
-    const id = category.getId;
+    const id = category.getId();
 
     if (!id) {
-        throw new Error("Categoria sem ID não pode ser atualizada.")
+        throw new Error("Categoria sem ID não pode ser atualizada.");
     }
 
     const { data, error } = await supabase
@@ -72,10 +77,14 @@ async function update(category: Category) {
         })
         .eq("id", id)
         .select()
-        .single();
+        .maybeSingle();
 
     if (error) {
         throw error;
+    }
+
+    if (!data) {
+        throw new NotFoundError("Categoria não encontrada.");
     }
 
     return data;
@@ -86,10 +95,15 @@ async function remove(id: string) {
         .from("categories")
         .delete()
         .eq("id", id)
-        .single();
+        .select()
+        .maybeSingle();
 
     if (error) {
         throw error;
+    }
+
+    if (!data) {
+        throw new NotFoundError("Categoria não encontrada.");
     }
 
     return data;

@@ -1,3 +1,4 @@
+import { ValidationError } from "../errors/Validation.js";
 export class Category {
     private id?: string | undefined;
     private name: string;
@@ -9,12 +10,19 @@ export class Category {
 
     constructor(name: string, display_order: number, description?: string, icon?: string) {
         this.id = undefined;
-        this.name = name;
+        this.name = "";
         this.description = description;
         this.icon = icon;
-        this.display_order = display_order;
+        this.display_order = 0;
         this.active = true;
+
+
+        this.rename(name);
+        this.changeDisplayOrder(display_order);
     }
+
+
+
 
     static restore(id: string, name: string, display_order: number, active: boolean, description: string, icon?: string): Category {
         const category = new Category(name, display_order, description, icon);
@@ -47,7 +55,10 @@ export class Category {
 
 
     rename(name: string): void {
-        this.name = name;
+        if(typeof name !== 'string' || name.trim().length === 0) {
+            throw new ValidationError('nome de categoria é obrigatorio.');
+        }
+        this.name = name.trim();
     }
 
 
@@ -57,9 +68,16 @@ export class Category {
     public changeIcon(icon: string): void {
         this.icon = icon;
     }
+
+
     public changeDisplayOrder(display_order: number): void {
+        if(!Number.isInteger(display_order) || display_order < 0) {
+            throw new ValidationError('display_order deve ser um número inteiro não negativo.');
+        }
         this.display_order = display_order;
     }
+
+
 
     activate(): void {
         this.active = true;
