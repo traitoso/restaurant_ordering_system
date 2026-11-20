@@ -358,4 +358,6 @@ Na página é possível ver todos os endpoints agrupados por entidade (Categorie
 ## 🚀 CI/CD e deploy
 
 - **GitHub Actions** (`.github/workflows/ci.yml`): a cada push/PR, instala as dependências, verifica a compilação e executa os testes unitários. Se os *secrets* `SUPABASE_URL` e `SUPABASE_SECRET_KEY` estiverem configurados no repositório, também roda os testes de integração com cobertura.
-- **Vercel**: a aplicação Express é publicada a partir do repositório, com as variáveis de ambiente configuradas no painel da Vercel.
+- **Vercel**: a aplicação Express é publicada automaticamente a cada push na `main`, com as variáveis de ambiente configuradas no painel da Vercel.
+  - API: https://restaurant-ordering-system-alisson-equipe.vercel.app
+  - Swagger: https://restaurant-ordering-system-alisson-equipe.vercel.app/api-docs
