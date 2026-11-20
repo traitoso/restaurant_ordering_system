@@ -1,11 +1,26 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseSecretKey = process.env.SUPABASE_SECRET_KEY!;
+let client: SupabaseClient | null = null;
 
-const supabase = createClient(
-    supabaseUrl,
-    supabaseSecretKey,
-);
+/**
+ * Retorna o cliente do Supabase (criado sob demanda).
+ * As credenciais vêm de variáveis de ambiente e nunca ficam no código.
+ */
+export function getSupabase(): SupabaseClient {
+    if (!client) {
+        const url = process.env.SUPABASE_URL;
+        const secretKey = process.env.SUPABASE_SECRET_KEY;
 
-export default supabase;
+        if (!url || !secretKey) {
+            throw new Error(
+                "Variáveis de ambiente SUPABASE_URL e SUPABASE_SECRET_KEY não configuradas."
+            );
+        }
+
+        client = createClient(url, secretKey, {
+            auth: { persistSession: false },
+        });
+    }
+
+    return client;
+}
