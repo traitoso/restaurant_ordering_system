@@ -15,8 +15,9 @@ API REST para um **sistema de autoatendimento de restaurante**, desenvolvida na 
 | Nome completo |
 |---------------|
 | Alisson de Oliveira da Silva |
-| _(adicionar integrante)_ |
-| _(adicionar integrante)_ |
+| Douglas Henrique |
+| Felipe Teixeira |
+| Ana Harps |
 
 ## 🛠️ Tecnologias utilizadas
 
