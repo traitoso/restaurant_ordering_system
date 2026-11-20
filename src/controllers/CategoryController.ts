@@ -1,187 +1,54 @@
 import type { Request, Response } from "express";
-import { Category } from "../model/Category.js";
-import CategoryRepository from "../repositories/CategoryRepository.js";
-import { ValidationError } from "../errors/Validation.js";
-import { NotFoundError } from "../errors/NotFound.js";
+import type { CategoryService } from "../services/CategoryService.js";
+import { parseBooleanQuery, parseStringQuery } from "../utils/validators.js";
 
-async function getAll(req: Request, res: Response) {
-    try {
-        const categories = await CategoryRepository.findAll();
+/**
+ * Controller de categorias: recebe a requisição HTTP, delega ao service
+ * e devolve a resposta com o código HTTP adequado. Erros são tratados
+ * pelo middleware global (errorHandler).
+ */
+export class CategoryController {
+    private readonly service: CategoryService;
 
-        res.status(200).json(categories)
-    } catch (error) {
-        console.log("Erro ao buscar categorias: ", error);
-
-        res.status(500).json({
-            message: "Erro ao buscar categorias."
-        });
-    }
-}
-
-async function getByKeyword(req: Request, res: Response) {
-    const { keyword } = req.query;
-
-    if (!keyword || typeof keyword != "string") {
-        return res.status(400).json({
-            message: "Palavra-chave não informada."
-        });
+    constructor(service: CategoryService) {
+        this.service = service;
     }
 
-    try {
-        const categories = await CategoryRepository.searchByKeyword(keyword);
-
+    getAll = async (req: Request, res: Response) => {
+        const categories = await this.service.list({
+            search: parseStringQuery(req.query.search),
+            active: parseBooleanQuery(req.query.active, "active"),
+        });
         res.status(200).json(categories);
-    } catch (error) {
-        console.log("Erro ao pesquisar categorias: ", error);
+    };
 
-        res.status(500).json({
-            message: "Erro ao pesquisar categorias.",
-        });
-    }
-}
-
-async function getById(req: Request<{ id: string }>, res: Response) {
-    const { id } = req.params;
-
-    if (!id) {
-        return res.status(404).json({
-            message: "ID da categoria não informado."
-        });
-    }
-
-    try {
-        const category = await CategoryRepository.findById(id);
-
-        res.status(200).json({
-            id: category.getId(),
-            name: category.getName(),
-            description: category.getDescription(),
-            icon: category.getIcon(),
-            display_order: category.getDisplayOrder(),
-            active: category.isActive(),
-        });
-    } catch (error) {
-        console.log("Erro ao buscar categoria: ", error);
-
-        if (error instanceof NotFoundError) {
-            return res.status(404).json({
-                message: error.message
-            });
+    search = async (req: Request, res: Response) => {
+        const keyword = parseStringQuery(req.query.keyword);
+        if (!keyword) {
+            res.status(400).json({ message: "Palavra-chave não informada." });
+            return;
         }
-        res.status(500).json({
-            message: "Erro ao buscar categoria."
-        });
-    }
-}
+        const categories = await this.service.list({ search: keyword });
+        res.status(200).json(categories);
+    };
 
-async function create(req: Request, res: Response) {
-    const { name, display_order, description, icon } = req.body;
+    getById = async (req: Request, res: Response) => {
+        const category = await this.service.getById(req.params.id);
+        res.status(200).json(category);
+    };
 
-    try {
-        const category = new Category(name, display_order, description, icon);
+    create = async (req: Request, res: Response) => {
+        const category = await this.service.create(req.body ?? {});
+        res.status(201).json(category);
+    };
 
-        const createdCategory = await CategoryRepository.create(category);
+    update = async (req: Request, res: Response) => {
+        const category = await this.service.update(req.params.id, req.body);
+        res.status(200).json(category);
+    };
 
-        res.status(201).json(createdCategory);
-    } catch (error) {
-        console.log("Erro ao criar categoria: ", error);
-
-        if(error instanceof ValidationError) {
-            return res.status(400).json({
-                message: error.message
-            });
-        }
-        res.status(500).json({
-            message: "Erro ao criar categoria."
-        });
-    }
-}
-
-async function update(req: Request<{ id: string }>, res: Response) {
-    const { id } = req.params;
-    const { name, display_order, description, icon, active } = req.body;
-
-    if (!id) {
-        return res.status(404).json({
-            message: "ID da categoria não informado."
-        });
-    }
-
-    try {
-        const category = await CategoryRepository.findById(id);
-
-        if(name !== undefined) {
-            category.rename(name);
-        }
-        if(description !== undefined) {
-            category.changeDescription(description);
-        }
-        if(icon !== undefined) {
-            category.changeIcon(icon);
-        }
-        if(display_order !== undefined) {
-            category.changeDisplayOrder(display_order);
-        }
-        if(active === true) {
-            category.activate();
-        }
-        if (active === false) {
-            category.deactivate();
-        }
-        const updatedCategory = await CategoryRepository.update(category);
-
-        res.status(200).json(updatedCategory);
-    } catch (error) {
-        console.log("Erro ao atualizar categoria: ", error);
-        if (error instanceof NotFoundError) {
-            return res.status(404).json({
-                message: error.message
-            });
-        }
-        if (error instanceof ValidationError) {
-            return res.status(400).json({
-                message: error.message
-            });
-        }
-        res.status(500).json({
-            message: "Erro ao atualizar categoria."
-        });
-    }
-}
-async function remove(req: Request<{ id: string }>, res: Response) {
-    const { id } = req.params;
-
-    if (!id) {
-        return res.status(404).json({
-            message: "ID da categoria não informado."
-        });
-    }
-
-    try {
-        await CategoryRepository.remove(id);
-
-        res.status(200).json({
-            message: "Categoria removida com sucesso."
-        })
-    } catch (error) {
-        console.log("Erro ao excluir categoria: ", error);
-
-        if (error instanceof NotFoundError) {
-            return res.status(404).json({
-                message: error.message
-            });
-        }
-        res.status(500).json({
-            message: "Erro ao excluir categoria."
-        });
-    }
-}
-
-export default {
-    getAll,
-    getByKeyword,
-    getById,
-    create,
-    update,
-    remove
+    remove = async (req: Request, res: Response) => {
+        await this.service.delete(req.params.id);
+        res.status(200).json({ message: "Categoria removida com sucesso." });
+    };
 }
