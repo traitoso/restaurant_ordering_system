@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Verificar compilação (TypeScript)
+        run: npm run typecheck
+
+      - name: Testes unitários
+        run: npm run test:unit
+
+      - name: Testes de integração + cobertura
+        if: env.SUPABASE_URL != '' && env.SUPABASE_SECRET_KEY != ''
+        run: npm run test:coverage
