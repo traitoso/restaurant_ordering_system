@@ -126,7 +126,7 @@ export class Product {
     }
 
     public changeImageUrl(imageUrl: unknown): void {
-        if (imageUrl === null) {
+        if (imageUrl === null || (typeof imageUrl === "string" && imageUrl.trim() === "")) {
             this.imageUrl = null;
             return;
         }

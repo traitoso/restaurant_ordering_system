@@ -79,6 +79,8 @@ describe("Product (model)", () => {
 
         const product = new Product({ ...valid, imageUrl: "https://img.com/x.png", description: "Bom" });
         expect(product.getImageUrl()).toBe("https://img.com/x.png");
+        product.changeImageUrl("   "); // texto vazio é tratado como "sem imagem"
+        expect(product.getImageUrl()).toBeNull();
         product.changeImageUrl(null);
         product.changeDescription(null);
         expect(product.getImageUrl()).toBeNull();
